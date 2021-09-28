@@ -85,7 +85,7 @@ When prompted, copy the Personal Access Token
 Go to the cloned Repository folder
 
 ```powershell
-cd ./terraform-training/
+cd ./terraform-sample/
 ```
 
 Create a new local branch, nammed dev
