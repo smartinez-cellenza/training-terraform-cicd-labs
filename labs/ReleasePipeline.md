@@ -59,37 +59,3 @@ Add a new Azure CLI task
 
 Configure this task
 
-
-
-Select **Approvals**
-
-In the Approver list, add your user
-
-> All Deployment job regarding this environment should now be validated
-
-
-### Exercice 2: Add this pipeline to the policies on main branch
-
-Go to the project settings -> Repositories
-
-Select the terraform-sample project
-
-Select the policies blade
-
-In the Branch Policies, select the main branch
-
-Add a new Build validation
-
-![repo_git](../assets/build_branch_policy.PNG)
-
-Leave the default options
-
-### Exercice 2: Create a pull request from dev into main
-
-In the Azure Repo blade, select the **terraform-sample** repo
-
-In the repository blade sub-menu, select Pull Requests
-
-Create a new Pull request from **dev** into **main**
-
-> Notice the build validation is triggered
