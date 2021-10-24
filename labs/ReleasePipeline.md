@@ -84,7 +84,7 @@ Add a new Build validation
 
 Leave the default options
 
-### Exercice 2: Create a pull request from dev into main
+### Exercice 3: Create a pull request from dev into main
 
 In the Azure Repo blade, select the **terraform-sample** repo
 
