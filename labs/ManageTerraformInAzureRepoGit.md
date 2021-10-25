@@ -17,6 +17,8 @@ After you complete this lab, you will be able to:
 
 - Check your access to the Azure Subscription and Resource Group provided for this training.
 - Check your access to the Azure DevOps Organization and project provided for this training.
+- Using the Azure Portal, create a Storage Account with a **tfstates** container. We are going to use this container as backend for the the tfstate file.
+
 
 ### Exercise 1: Import a Git Repository
 
@@ -92,6 +94,20 @@ Create a new local branch, nammed dev
 
 ```powershell
 git checkout -b dev
+```
+
+In the configuration folder, update the **backend.hcl** file for each environment. Update *resource_group_name* and *storage_account_name* to match the Storage Account you created earlier.
+
+Add this file for the next commit
+
+```powershell
+git add .
+```
+
+Create a new commit
+
+```powershell
+git commit -m "update backend configuration"
 ```
 
 push this branch
