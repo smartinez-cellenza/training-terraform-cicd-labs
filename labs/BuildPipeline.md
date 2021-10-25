@@ -78,7 +78,7 @@ Click on Run to execute the pipeline
 
 > This pipeline use terraform fmt to lint terraform source code. If you have errors, fix them and run the pipeline again
 
-Select the Pull Request pipeline in the pipeline blade, and rename it to **build**
+Select the Pull Request pipeline in the pipeline blade, and rename it to **PR**
 
 ![repo_git](../assets/build_rename.PNG)
 
