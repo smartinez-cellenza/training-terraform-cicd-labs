@@ -87,77 +87,178 @@ For **ARM_ACCESS_KEY** and **admin_account_password**, set them as secret
 
 Repeat the same operation for **uat** and **prod** environment. **ARM_ACCESS_KEY** and **ARM_SUBSCRIPTION_ID** won't change in our case (we will always target the same subscription)
 
+### Exercice 4: Create Release pipeline for dev environment
 
+In the exercice, we will create the Release pipeline.
 
-In the Azure portal, select your project
+It will use
+- The artefact produced by the build pipeline
+- The library we created
+- The environment we created
 
-Select your project
+A Service Connection has been created and shared in your project. It contains the information on the Service Principal.
 
-In the Pipelines blade, select Release
+Select your *terraform-sample* in Azure DevOps portal
 
-Click on **New Pipeline**
+Select the *dev* branch
 
-Select **Start with an empty job**
+Create a new file
 
-In the stage window, rename the stage **dev** and close the window
+- New file name : release_dev.yml
 
-Click on **Add an artifact
+Copy the following code in the editor
 
-- Source Type : **Azure Repository**
-- Project : **your project**
-- Default branch : **dev**
+```yaml
+trigger: none
 
-![repo_git](../assets/release_artifact.PNG)
+pool:
+  vmImage: ubuntu-latest
 
-In the **dev** change the agent specification to use ubuntu-20.04
+resources:
+ pipelines:
+   - pipeline: build
+     source: build
 
-![repo_git](../assets/stage_agent.PNG)
+jobs :
+  - deployment: deploy_dev
+    displayName: Deploy Dev Environment
+    environment: dev
+    variables:
+    - group: dev
+    strategy:
+     runOnce:
+       deploy:
+         steps:
+           - task: AzureCLI@2
+             env:
+               TF_VAR_admin_account_password: $(admin_account_password)
+             displayName: Deploy Dev Environment
+             inputs:
+              azureSubscription: 'Terraform Service Principal'
+              scriptType: 'pscore'
+              scriptLocation: 'inlineScript'
+              addSpnToEnvironment: true
+              inlineScript: |
+                cd $(PIPELINE.WORKSPACE)/build/terraform/terraform
+                $env:ARM_CLIENT_ID=$env:servicePrincipalId
+                $env:ARM_CLIENT_SECRET=$env:servicePrincipalKey
+                $env:ARM_TENANT_ID=$env:tenantId
+                terraform init -backend-config='../configuration/dev/backend.hcl'
+                terraform apply -var-file='../configuration/dev/var.tfvars' -input=false -auto-approve
+```
 
-In the variable tab, create variables
+> Notice the different sections
 
-![repo_git](../assets/release_variable.PNG)
+> Notice the deployment step
 
-- ARM_SUBSCRIPTION_ID : Id of the provided subscription
-- ARM_ACCESS_KEY : An access key of the backend Storage Account
-- TF_VAR_admin_account_password : Admin account password of the DB
+Go to the Pipelines blade in Azure DevOps and create a new pipeline
 
-Add a new Azure CLI task
+![repo_git](../assets/build_new_pipeline.PNG)
 
-![repo_git](../assets/stage_job.PNG)
+In the Where is your source code step, select **Azure Repo Git**
 
-Configure this task
+In the Select a repository step, select **terraform-sample**
 
+In the Configure your pipeline step, select **Existing Azure Pipelines YAML file**
 
+In the select an exising yaml file
+- select the **dev** branch
+- Fill the path : **/pipelines/release.yml**
 
-Select **Approvals**
+Click on Run to execute the pipeline
 
-In the Approver list, add your user
+In the pipeline blade, ensure the pipeline has run.
 
-> All Deployment job regarding this environment should now be validated
+> Go to the Azure Portal and ensure resource has been created in your Resource Group
 
+Select the release pipeline in the pipeline blade, and rename it to **release_dev**
 
-### Exercice 2: Add this pipeline to the policies on main branch
+![repo_git](../assets/build_rename.PNG)
 
-Go to the project settings -> Repositories
+### Exercice 4: Create Release pipeline for dev environment
 
-Select the terraform-sample project
+In the exercice, we will create the Release pipeline.
 
-Select the policies blade
+It will use
+- The artefact produced by the build pipeline
+- The library we created
+- The environment we created
 
-In the Branch Policies, select the main branch
+A Service Connection has been created and shared in your project. It contains the information on the Service Principal.
 
-Add a new Build validation
+Select your *terraform-sample* in Azure DevOps portal
 
-![repo_git](../assets/build_branch_policy.PNG)
+Select the *dev* branch
 
-Leave the default options
+Create a new file
 
-### Exercice 3: Create a pull request from dev into main
+- New file name : release_uat.yml
 
-In the Azure Repo blade, select the **terraform-sample** repo
+Copy the following code in the editor
 
-In the repository blade sub-menu, select Pull Requests
+```yaml
+trigger: none
 
-Create a new Pull request from **dev** into **main**
+pool:
+  vmImage: ubuntu-latest
 
-> Notice the build validation is triggered
+resources:
+ pipelines:
+   - pipeline: build
+     source: build
+
+jobs :
+  - deployment: deploy_uat
+    displayName: Deploy Uat Environment
+    environment: uat
+    variables:
+    - group: uat
+    strategy:
+     runOnce:
+       deploy:
+         steps:
+           - task: AzureCLI@2
+             env:
+               TF_VAR_admin_account_password: $(admin_account_password)
+             displayName: Deploy Uat Environment
+             inputs:
+              azureSubscription: 'Terraform Service Principal'
+              scriptType: 'pscore'
+              scriptLocation: 'inlineScript'
+              addSpnToEnvironment: true
+              inlineScript: |
+                cd $(PIPELINE.WORKSPACE)/build/terraform/terraform
+                $env:ARM_CLIENT_ID=$env:servicePrincipalId
+                $env:ARM_CLIENT_SECRET=$env:servicePrincipalKey
+                $env:ARM_TENANT_ID=$env:tenantId
+                terraform init -backend-config='../configuration/dev/backend.hcl'
+                terraform apply -var-file='../configuration/uat/var.tfvars' -input=false -auto-approve
+```
+
+> Notice the different sections
+
+Go to the Pipelines blade in Azure DevOps and create a new pipeline
+
+![repo_git](../assets/build_new_pipeline.PNG)
+
+In the Where is your source code step, select **Azure Repo Git**
+
+In the Select a repository step, select **terraform-sample**
+
+In the Configure your pipeline step, select **Existing Azure Pipelines YAML file**
+
+In the select an exising yaml file
+- select the **dev** branch
+- Fill the path : **/pipelines/release_uat.yml**
+
+Click on Run to execute the pipeline
+
+> Notice the approbation required
+
+In the pipeline blade, ensure the pipeline has run.
+
+> Go to the Azure Portal and ensure resource has been created in your Resource Group
+
+Select the release pipeline in the pipeline blade, and rename it to **release_uat**
+
+![repo_git](../assets/build_rename.PNG)
