@@ -208,8 +208,32 @@ resources:
      source: build
 
 jobs :
+
+  - job: plan_uat
+    displayName: Run terraform plan on uat environment
+    variables:
+    - group:  uat
+    steps:
+    - checkout: self
+    - download: build
+    - task: AzureCLI@2
+      displayName: Run terraform plan on uat environment
+      inputs:
+        azureSubscription: 'Terraform Service Principal'
+        scriptType: 'pscore'
+        scriptLocation: 'inlineScript'
+        addSpnToEnvironment: true
+        inlineScript: |
+          cd $(PIPELINE.WORKSPACE)/build/terraform/terraform
+          $env:ARM_CLIENT_ID=$env:servicePrincipalId
+          $env:ARM_CLIENT_SECRET=$env:servicePrincipalKey
+          $env:ARM_TENANT_ID=$env:tenantId
+          terraform init -backend-config='../configuration/uat/backend.hcl'
+          terraform plan -var-file='../configuration/uat/var.tfvars' -input=false
+
   - deployment: deploy_uat
     displayName: Deploy Uat Environment
+    dependsOn: plan_uat
     environment: uat
     variables:
     - group: uat
@@ -231,7 +255,7 @@ jobs :
                 $env:ARM_CLIENT_ID=$env:servicePrincipalId
                 $env:ARM_CLIENT_SECRET=$env:servicePrincipalKey
                 $env:ARM_TENANT_ID=$env:tenantId
-                terraform init -backend-config='../configuration/dev/backend.hcl'
+                terraform init -backend-config='../configuration/uat/backend.hcl'
                 terraform apply -var-file='../configuration/uat/var.tfvars' -input=false -auto-approve
 ```
 
