@@ -217,6 +217,8 @@ jobs :
     - checkout: self
     - download: build
     - task: AzureCLI@2
+      env:
+         TF_VAR_admin_account_password: $(admin_account_password)
       displayName: Run terraform plan on uat environment
       inputs:
         azureSubscription: 'Terraform Service Principal'
