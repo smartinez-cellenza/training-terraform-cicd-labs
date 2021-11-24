@@ -207,58 +207,64 @@ resources:
    - pipeline: build
      source: build
 
-jobs :
-
-  - job: plan_uat
-    displayName: Run terraform plan on uat environment
-    variables:
-    - group:  uat
-    steps:
-    - checkout: self
-    - download: build
-    - task: AzureCLI@2
-      env:
-         TF_VAR_admin_account_password: $(admin_account_password)
+stages:
+- stage: plan_uat
+  displayName: Run terraform plan on uat environment
+  jobs :
+    - job: plan_uat
       displayName: Run terraform plan on uat environment
-      inputs:
-        azureSubscription: 'Terraform Service Principal'
-        scriptType: 'pscore'
-        scriptLocation: 'inlineScript'
-        addSpnToEnvironment: true
-        inlineScript: |
-          cd $(PIPELINE.WORKSPACE)/build/terraform/terraform
-          $env:ARM_CLIENT_ID=$env:servicePrincipalId
-          $env:ARM_CLIENT_SECRET=$env:servicePrincipalKey
-          $env:ARM_TENANT_ID=$env:tenantId
-          terraform init -backend-config='../configuration/uat/backend.hcl'
-          terraform plan -var-file='../configuration/uat/var.tfvars' -input=false
+      variables:
+      - group:  uat
+      steps:
+      - checkout: self
+      - download: build
+      - task: AzureCLI@2
+        env:
+          TF_VAR_admin_account_password: $(admin_account_password)
+        displayName: Run terraform plan on uat environment
+        inputs:
+          azureSubscription: 'Terraform Service Principal'
+          scriptType: 'pscore'
+          scriptLocation: 'inlineScript'
+          addSpnToEnvironment: true
+          inlineScript: |
+            cd $(PIPELINE.WORKSPACE)/build/terraform/terraform
+            $env:ARM_CLIENT_ID=$env:servicePrincipalId
+            $env:ARM_CLIENT_SECRET=$env:servicePrincipalKey
+            $env:ARM_TENANT_ID=$env:tenantId
+            terraform init -backend-config='../configuration/uat/backend.hcl'
+            terraform plan -var-file='../configuration/uat/var.tfvars' -input=false
 
-  - deployment: deploy_uat
-    displayName: Deploy Uat Environment
-    dependsOn: plan_uat
-    environment: uat
-    variables:
-    - group: uat
-    strategy:
-     runOnce:
-       deploy:
-         steps:
-           - task: AzureCLI@2
-             env:
-               TF_VAR_admin_account_password: $(admin_account_password)
-             displayName: Deploy Uat Environment
-             inputs:
-              azureSubscription: 'Terraform Service Principal'
-              scriptType: 'pscore'
-              scriptLocation: 'inlineScript'
-              addSpnToEnvironment: true
-              inlineScript: |
-                cd $(PIPELINE.WORKSPACE)/build/terraform/terraform
-                $env:ARM_CLIENT_ID=$env:servicePrincipalId
-                $env:ARM_CLIENT_SECRET=$env:servicePrincipalKey
-                $env:ARM_TENANT_ID=$env:tenantId
-                terraform init -backend-config='../configuration/uat/backend.hcl'
-                terraform apply -var-file='../configuration/uat/var.tfvars' -input=false -auto-approve
+- stage: apply_uat
+  displayName: Run terraform plan on uat environment
+  dependsOn: plan_uat
+  jobs :
+    - deployment: deploy_uat
+      displayName: Deploy Uat Environment      
+      environment: uat
+      variables:
+      - group: uat
+      strategy:
+        runOnce:
+          deploy:
+            steps:
+              - task: AzureCLI@2
+                env:
+                  TF_VAR_admin_account_password: $(admin_account_password)
+                displayName: Deploy Uat Environment
+                inputs:
+                  azureSubscription: 'Terraform Service Principal'
+                  scriptType: 'pscore'
+                  scriptLocation: 'inlineScript'
+                  addSpnToEnvironment: true
+                  inlineScript: |
+                    cd $(PIPELINE.WORKSPACE)/build/terraform/terraform
+                    $env:ARM_CLIENT_ID=$env:servicePrincipalId
+                    $env:ARM_CLIENT_SECRET=$env:servicePrincipalKey
+                    $env:ARM_TENANT_ID=$env:tenantId
+                    terraform init -backend-config='../configuration/uat/backend.hcl'
+                    terraform apply -var-file='../configuration/uat/var.tfvars' -input=false -auto-approve
+
 ```
 
 > Notice the different sections
