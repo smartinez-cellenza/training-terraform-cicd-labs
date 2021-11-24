@@ -175,7 +175,7 @@ Select the release pipeline in the pipeline blade, and rename it to **release_de
 
 ![repo_git](../assets/build_rename.PNG)
 
-### Exercice 4: Create Release pipeline for dev environment
+### Exercice 4: Create Release pipeline for uat environment
 
 In the exercice, we will create the Release pipeline.
 
