@@ -102,6 +102,8 @@ Select your *terraform-sample* in Azure DevOps portal
 
 Select the *dev* branch
 
+Select the *pipelines* folder
+
 Create a new file
 
 - New file name : release_dev.yml
@@ -163,7 +165,7 @@ In the Configure your pipeline step, select **Existing Azure Pipelines YAML file
 
 In the select an exising yaml file
 - select the **dev** branch
-- Fill the path : **/pipelines/release.yml**
+- Fill the path : **/pipelines/release_dev.yml**
 
 Click on Run to execute the pipeline
 
