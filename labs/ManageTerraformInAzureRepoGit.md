@@ -51,38 +51,21 @@ The repository is imported and ready to use
 
 In this exercice, we are going to create a dev branch
 
-#### Generate a PAT (Personal Access Token)
-
-In the Azure DevOps portal, generate a new Personal Access Token
-
-![repo_git](../assets/git_pat.PNG)
-
-Click on *New Token*
-
-![repo_git](../assets/git_pat_config.PNG)
-
-- Name : training
-- Scope : Code -> Read & write
-
-Click on Create and copy the generated Token
-
-> We're going to use this token to clone the repository
-
 #### Clone Repository and create branch
 
 Get the clone URL of your repository
 
 ![repo_git](../assets/git_clone_url.PNG)
 
-In the Azure Portal, open a Cloud Shell session
-
 Run the following command to clone the repository
 
 ```powershell
-git clone the_repository_url_just_get
+mkdir training_terraform_cicd
+cd training_terraform_cicd
+git clone the_repository_clone_url
 ```
 
-When prompted, copy the Personal Access Token
+> If it's the first time you use this Azure DevOps Organization, provide authentication informations
 
 Go to the cloned Repository folder
 
@@ -96,9 +79,29 @@ Create a new local branch, nammed dev
 git checkout -b dev
 ```
 
-In the configuration folder, update the **backend.hcl** file for each environment. Update *resource_group_name* and *storage_account_name* to match the Storage Account you created earlier.
+Push this local branch to Azure DevOps
 
-Add this file for the next commit
+```powershell
+git push --set-upstream origin dev
+```
+
+#### Update backends configuration and variables
+
+Create a new local branch from the *dev* branch, nammed *feat/updateconf*
+
+```powershell
+git status
+# Ensure you are on the dev branch.
+git checkout -b feat/updateconf
+```
+
+In the configuration folder, update the **backend.hcl** file for **each environment**. Update *resource_group_name* and *storage_account_name* to match the Storage Account you created earlier.
+
+> We will use the same Storage Account and container for all environments. Only the tfstate file name will be different.
+
+> This is a lab configuration. In real environments, you might want to use a dedicated storage for each environment.
+
+Add this files for the next commit
 
 ```powershell
 git add .
@@ -110,15 +113,30 @@ Create a new commit
 git commit -m "update backend configuration"
 ```
 
+In the configuration folder, update the **var.tfvars** file for **each environment**.
+- **resource_group_name** : The name of the Resource Group you are using for this training
+- **admin_account_login** : We are going to deploy an Azure SQL Database Server. This variable will be used to set the Administrator account login
+- **project_name** : The name of the project. It will be used with the environment variable to build the SQL Server name.
+
+Add this files for the next commit
+
+```powershell
+git add .
+```
+
+Create a new commit
+
+```powershell
+git commit -m "update tfvars"
+```
+
 push this branch
 
 ```powershell
-git push --set-upstream origin dev
+git push --set-upstream origin feat/updateconf
 ```
 
-When prompted, copy the Personal Access Token
-
-### Exercise 3: Protect main branch
+### Exercise 3: Protect dev and main branch
 
 Go to the project settings -> Repositories
 
@@ -126,10 +144,12 @@ Select the terraform-sample project
 
 Select the policies blade
 
-In the Branch Policies, select the main branch
+In the Branch Policies, select the **main** branch
 
 Activate the option **Require a minimum number of reviewers**, set the Minimum number of reviewvers to 1 and Allow requestors to approve their own changes.
 
 > This will prevent direct commit to the main branch, and only allow Pull Request
 
 > This configuration is not suitable for a real world project, but it allows you to complete pull request for this lab
+
+Apply the same configuration to the **dev** branch
