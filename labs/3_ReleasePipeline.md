@@ -133,6 +133,7 @@ jobs :
          steps:
            - task: AzureCLI@2
              env:
+               ARM_ACCESS_KEY: $(ARM_ACCESS_KEY)
                TF_VAR_admin_account_password: $(admin_account_password)
              displayName: Deploy Dev Environment
              inputs:
@@ -222,6 +223,7 @@ stages:
       - download: build
       - task: AzureCLI@2
         env:
+          ARM_ACCESS_KEY: $(ARM_ACCESS_KEY)
           TF_VAR_admin_account_password: $(admin_account_password)
         displayName: Run terraform plan on uat environment
         inputs:
@@ -252,6 +254,7 @@ stages:
             steps:
               - task: AzureCLI@2
                 env:
+                  ARM_ACCESS_KEY: $(ARM_ACCESS_KEY)
                   TF_VAR_admin_account_password: $(admin_account_password)
                 displayName: Deploy Uat Environment
                 inputs:
